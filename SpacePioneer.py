@@ -1,8 +1,8 @@
 import arcade
 from models import Player
-SCREEN_WIDTH = 600
+SCREEN_WIDTH = 480
 SCREEN_HEIGHT = 640
-SPRITE_SCALING = 0.5
+SPRITE_SCALING = 1
 
 
 class SpaceGameWindow(arcade.Window):
@@ -22,14 +22,19 @@ class SpaceGameWindow(arcade.Window):
         self.player.setup(SCREEN_WIDTH/2, 70, self.all_sprites_list)
         self.all_sprites_list.append(self.player)
 
-   
+    #Key setting
+    def on_key_press(self, key, key_modifiers):
+        self.player.on_key_press(key, key_modifiers)
+    def on_key_release(self, key, modifiers):
+        self.player.on_key_release(key, modifiers)
+
     def on_draw(self):
         arcade.start_render()
         arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2,
                                       SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.player.draw()
-#    def update(self, delta):
-#        self.player.update(delta)
+    def update(self, delta):
+        self.player.update(delta)
         
         
  

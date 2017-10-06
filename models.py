@@ -39,6 +39,10 @@ class Player(arcade.Sprite):
             self.change_x = MOVEMENT_SPEED
         elif key == arcade.key.LEFT:
             self.change_x = -MOVEMENT_SPEED
+        elif key == arcade.key.UP:
+            self.change_y = MOVEMENT_SPEED
+        elif key == arcade.key.DOWN:
+            self.change_y = -MOVEMENT_SPEED
         elif key == arcade.key.SPACE:
             laser = Laser("images/laser1.png", SPRITE_SCALING * 1.5)
             laser.center_x = self.center_x
@@ -51,15 +55,21 @@ class Player(arcade.Sprite):
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.change_x = 0
+        elif key == arcade.key.UP or key == arcade.key.LEFT:
+            self.change_y = 0   
     
     def update(self):
         self.center_x += self.change_x
-   
+        self.center_y += self.change_y
 
         if self.left < -5:
             self.left = -5
         if self.right > SCREEN_WIDTH+5:
             self.right = SCREEN_WIDTH+5
+        if self.bottom < 5:
+            self.bottom = 5
+        if self.top > SCREEN_HEIGHT-5:
+            self.top = SCREEN_HEIGHT-5 
 
         for laser in self.laser_list:
             hit_list = arcade.check_for_collision_with_list(laser,
@@ -122,5 +132,5 @@ class Enemy1(arcade.Sprite):
         if self.frame_count % 75 == 0:
             self.shoot()
         for laser in self.laser_list:         
-            if laser.bottom < 0 or laser.left < 0 or laser.right > SCREEN_WIDTH:
+            if laser.bottom < 0:
                 laser.kill()

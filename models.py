@@ -32,7 +32,8 @@ class Player(arcade.Sprite):
         self.rock_list = rock_list
         self.enemy_list = enemy_list
         self.center_x = x
-        self.center_y = y        
+        self.center_y = y    
+        self.score = score    
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.RIGHT:
@@ -78,7 +79,7 @@ class Player(arcade.Sprite):
                 laser.kill()
             for rock in hit_list:
                 rock.kill()
-                #score += 1
+                self.score += 1
         for laser in self.laser_list:
             hit_list = arcade.check_for_collision_with_list(laser,
                                                             self.enemy_list)

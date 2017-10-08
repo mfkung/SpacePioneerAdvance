@@ -12,7 +12,7 @@ class Background(arcade.Sprite):
     def setup(self, x, bottom ):
         self.width = SCREEN_WIDTH
         self.height = SCREEN_HEIGHT
-        self.center_x = x
+        self.center_x = 240
         self.bottom = bottom
 
     def update(self):
@@ -42,7 +42,7 @@ class SpaceGameWindow(arcade.Window):
         #Set background
         self.background_list = arcade.SpriteList()
         background = Background("images/BGf.png", SPRITE_SCALING)
-        background.setup(SCREEN_WIDTH ,SCREEN_HEIGHT)
+        background.setup(SCREEN_WIDTH  ,SCREEN_HEIGHT)
         self.background_list.append(background)
         background = Background("images/BGf.png", SPRITE_SCALING)
         background.setup(SCREEN_WIDTH ,0)

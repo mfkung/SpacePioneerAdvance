@@ -91,18 +91,9 @@ class Player(arcade.Sprite):
 
 ####    Asteroid ####
 class Falling(arcade.Sprite):
-    def __init__(self, image_file_name, scale):
-        super().__init__(image_file_name, scale=scale)
-        self.size = 0
     def update(self):
         super().update()
         self.center_y -= 2
-        if self.top < 0:
-            self.bottom = SCREEN_HEIGHT
-        if self.center_x < SCREEN_WIDTH:
-            self.kill()
-        if self.center_x > SCREEN_WIDTH:
-            self.kill()
         
 ####   Enemy1 ####
 class Enemy1(arcade.Sprite):

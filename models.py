@@ -87,7 +87,7 @@ class Player(arcade.Sprite):
             for enemy in hit_list:
                 enemy.kill() 
         for laser in self.laser_list:         
-            if laser.top > 660:
+            if laser.top > 645:
                 laser.kill()  
 
 ####    Asteroid ####
@@ -99,9 +99,9 @@ class Falling(arcade.Sprite):
 
 ####   Enemy1 ####
 class Enemy1(arcade.Sprite):
-    def setup(self, x, y, all_sprites_list):
+    def setup(self, x, y, all_sprites_list, laser_e_list):
         self.all_sprites_list = all_sprites_list
-        self.laser_list = arcade.SpriteList()
+        self.laser_e_list = arcade.SpriteList()
         self.center_x = x
         self.center_y = y
         self.center_y -= random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT * 50)
@@ -111,16 +111,16 @@ class Enemy1(arcade.Sprite):
         self.frame_count = 0 
 
     def shoot(self):
-        laser = Laser_E("images/laser2.png", SPRITE_SCALING * 1.5)
-        laser.center_x = self.center_x
-        laser.bottom = self.top -20
+        laser_e = Laser_E("images/laser2.png", SPRITE_SCALING * 1.5)
+        laser_e.center_x = self.center_x
+        laser_e.bottom = self.top -20
         
         
-        laser.center_x = self.center_x
-        laser.top = self.bottom
+        laser_e.center_x = self.center_x
+        laser_e.top = self.bottom
         
-        
-        self.laser_list.append(laser)
+        self.all_sprites_list.append(laser_e)
+        #self.laser_list.append(laser)
 
     def update(self):
         self.frame_count += 1
@@ -128,9 +128,48 @@ class Enemy1(arcade.Sprite):
         if self.top < 620:
             self.top = 620
         
-        self.laser_list.update()
+        self.laser_e_list.update()
         if self.frame_count % 75 == 0:
             self.shoot()
-        for laser in self.laser_list:         
-            if laser.bottom < 0:
-                laser.kill()
+        for laser_e in self.laser_e_list:         
+            if laser_e.bottom < 0:
+                laser_e.kill()
+
+
+####   Enemy2 ####
+class Enemy2(arcade.Sprite):
+    def setup(self, x, y, all_sprites_list, laser_e_list):
+        self.all_sprites_list = all_sprites_list
+        self.laser_e_list = arcade.SpriteList()
+        self.center_x = x
+        self.center_y = y
+        self.center_y -= random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT * 50)
+        self.center_x -= random.randrange(SCREEN_WIDTH-10)
+
+        self.wait_time = 0
+        self.frame_count = 0 
+
+    def shoot(self):
+        laser_e = Laser_E("images/laser2.png", SPRITE_SCALING * 1.5)
+        laser_e.center_x = self.center_x
+        laser_e.bottom = self.top -20
+        
+        
+        laser_e.center_x = self.center_x
+        laser_e.top = self.bottom
+        
+        self.all_sprites_list.append(laser_e)
+        #self.laser_list.append(laser)
+
+    def update(self):
+        self.frame_count += 1
+        self.center_y -= 3
+        if self.top < 620:
+            self.top = 620
+        
+        self.laser_e_list.update()
+        if self.frame_count % 75 == 0:
+            self.shoot()
+        for laser_e in self.laser_e_list:         
+            if laser_e.bottom < 0:
+                laser_e.kill()

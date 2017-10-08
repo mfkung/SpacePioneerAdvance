@@ -4,38 +4,56 @@ from random import randint
 from models import Player,Falling,Laser,Enemy1
 SCREEN_WIDTH = 480
 SCREEN_HEIGHT = 640
-SPRITE_SCALING = 0.7
+SPRITE_SCALING = 0.6
 INSTRUCTIONS_PAGE_0 = 0
 GAME_RUNNING = 1
+
+class Background(arcade.Sprite):
+    def setup(self, x, bottom ):
+        self.width = SCREEN_WIDTH
+        self.height = SCREEN_HEIGHT
+        self.center_x = x
+        self.bottom = bottom
+
+    def update(self):
+        self.center_y -= 1
+        if self.top < 0:
+            self.bottom = SCREEN_HEIGHT
 
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
         super().__init__(width, height)
+        self.background = arcade.load_texture("images/BGf.png")
         self.current_state = INSTRUCTIONS_PAGE_0
         self.all_sprites_list = None
         self.player_sprite = None
         self.rock_list = None
         self.laser_list = None
-        self.background = None
         self.enemy_list = None
         self.set_mouse_visible(False)
         self.score = 0
         self.game_over = False
-        
         self.instructions = []
-        
         texture = arcade.load_texture("images/intro2.png")
         self.instructions.append(texture)
         
 
     def setup(self):
-        #Set backgound
-        self.background = arcade.load_texture("images/BGf.png")
+        #Set background
+        self.background_list = arcade.SpriteList()
+        background = Background("images/BGf.png", SPRITE_SCALING)
+        background.setup(SCREEN_WIDTH ,SCREEN_HEIGHT)
+        self.background_list.append(background)
+        background = Background("images/BGf.png", SPRITE_SCALING)
+        background.setup(SCREEN_WIDTH ,0)
+        self.background_list.append(background)
+
         #Sprite lists
         self.all_sprites_list = arcade.SpriteList()
         self.rock_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
         self.laser_list = arcade.SpriteList()
+        self.laser_e_list = arcade.SpriteList()
         #Set player
         self.player = Player("images/rocket2.png", SPRITE_SCALING)
         self.player.setup(SCREEN_WIDTH/2, 60, self.all_sprites_list,self.rock_list, self.enemy_list ,self.score)
@@ -43,7 +61,7 @@ class SpaceGameWindow(arcade.Window):
         #Set enemy1
         for i in range(25):
             self.enemy1_sprite = Enemy1("images/spaceship1.png", SPRITE_SCALING)
-            self.enemy1_sprite.setup(randint(40,440), 0 , self.all_sprites_list)
+            self.enemy1_sprite.setup(randint(40,440), 0 , self.all_sprites_list, self.laser_e_list)
             self.enemy1_sprite.center_y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT * 25)
             self.enemy1_sprite.center_x = randint(40,440)
             self.all_sprites_list.append(self.enemy1_sprite)
@@ -60,7 +78,7 @@ class SpaceGameWindow(arcade.Window):
             asteroid_sprite.center_y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT * 50)
             asteroid_sprite.center_x = random.randrange(SCREEN_WIDTH-10)
 
-            asteroid_sprite.change_angle = (random.random() - 0.5) * 2
+            asteroid_sprite.change_angle = (random.random() - 0.5) * 1.4
             #asteroid.size = 4
             self.all_sprites_list.append(asteroid_sprite)
             self.rock_list.append(asteroid_sprite)
@@ -75,12 +93,13 @@ class SpaceGameWindow(arcade.Window):
         output = "Score: {}".format(self.score)
         arcade.draw_text(output, 10, 620, arcade.color.WHITE, 14)                                  
         for enemy in self.enemy_list:
-            enemy.laser_list.draw()
+            enemy.laser_e_list.draw()
         self.enemy_list.draw()
 
     def on_draw(self):
         arcade.start_render()
-        arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+        #arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+        self.background_list.draw()
         if self.current_state == INSTRUCTIONS_PAGE_0:
             self.draw_instructions_page(0)
 
@@ -101,8 +120,10 @@ class SpaceGameWindow(arcade.Window):
             self.setup()
 
     def update(self, delta):
+        self.background_list.update()
         if self.current_state == GAME_RUNNING:
             self.all_sprites_list.update()
+            self.laser_e_list.update()
             hit_list = \
                 arcade.check_for_collision_with_list(self.player,
                                                     self.rock_list)
@@ -111,14 +132,14 @@ class SpaceGameWindow(arcade.Window):
                 self.game_over = True
                 print("Game over")
                 exit()
-            '''hit_list2 = \
+            hit_list2 = \
                 arcade.check_for_collision_with_list(self.player,
-                                                    self.laser_list)
-            for laser in hit_list2:
-                laser.kill()
+                                                    self.laser_e_list)
+            for laser_e in hit_list2:
+                laser_e.kill()
                 self.game_over = True
                 print("Game over")
-                exit()    '''
+                exit()    
  
 if __name__ == '__main__':
     window = SpaceGameWindow(SCREEN_WIDTH, SCREEN_HEIGHT)

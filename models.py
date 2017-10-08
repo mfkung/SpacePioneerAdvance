@@ -14,26 +14,32 @@ SPRITE_SCALING = 0.7
 #              arcade.key.LEFT: DIR_LEFT}
 class Laser(arcade.Sprite):
     def update(self):
+        self.isEnemy = False
         self.center_y += LASER_SPEED
         if self.center_x < -100 or self.center_x > 1500 or \
                 self.center_y > 1100 or self.center_y < -100:
             self.kill()
 class Laser_E(arcade.Sprite):
     def update(self):
-        self.center_y -= LASER_SPEED-5
-        if self.center_x < -100 or self.center_x > 1500 or \
-                self.center_y > 1100 or self.center_y < -100:
-            self.kill()
+        self.center_y -= LASER_SPEED-6.5
+
 
 class Player(arcade.Sprite):
-    def setup(self, x, y, all_sprites_list, rock_list, enemy_list, score):
+    def setup(self, x, y, all_sprites_list, rock_list, enemy_list, score, laser_list):
         self.all_sprites_list = all_sprites_list
-        self.laser_list = arcade.SpriteList()
+        self.laser_list = laser_list
         self.rock_list = rock_list
         self.enemy_list = enemy_list
         self.center_x = x
         self.center_y = y    
-        self.score = score    
+        self.score = score  
+        self.respawning = 0  
+    def respawn(self):
+
+        self.respawning = 1
+        self.center_x = SCREEN_WIDTH / 2
+        self.center_y = 20
+        self.angle = 0
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.RIGHT:
@@ -44,13 +50,13 @@ class Player(arcade.Sprite):
             self.change_y = MOVEMENT_SPEED
         elif key == arcade.key.DOWN:
             self.change_y = -MOVEMENT_SPEED
-        elif key == arcade.key.SPACE:
+        elif not self.respawning and key == arcade.key.SPACE:
             laser = Laser("images/laser1.png", SPRITE_SCALING * 1.5)
             laser.center_x = self.center_x
             laser.bottom = self.top -20
-
+            
            
-            self.all_sprites_list.append(laser)
+            #self.all_sprites_list.append(laser)
             self.laser_list.append(laser)    
 
     def on_key_release(self, key, modifiers):
@@ -72,58 +78,51 @@ class Player(arcade.Sprite):
         if self.top > SCREEN_HEIGHT-5:
             self.top = SCREEN_HEIGHT-5 
 
-        for laser in self.laser_list:
-            hit_list = arcade.check_for_collision_with_list(laser,
-                                                            self.rock_list)
-            if len(hit_list) > 0:
-                laser.kill()
-            for rock in hit_list:
-                rock.kill()
-                self.score += 1
-        for laser in self.laser_list:
-            hit_list = arcade.check_for_collision_with_list(laser,
-                                                            self.enemy_list)
-            if len(hit_list) > 0:
-                laser.kill()
-            for enemy in hit_list:
-                enemy.kill() 
+        if self.respawning:
+            self.respawning += 2
+            self.alpha = self.respawning / 500
+            if self.respawning > 250:
+                self.respawning = 0
+                self.alpha = 1
+
         for laser in self.laser_list:         
             if laser.top > 645:
                 laser.kill()  
 
 ####    Asteroid ####
 class Falling(arcade.Sprite):
+    def __init__(self, image_file_name, scale):
+        super().__init__(image_file_name, scale=scale)
+        self.size = 0
     def update(self):
+        super().update()
         self.center_y -= 2
         if self.top < 0:
             self.bottom = SCREEN_HEIGHT
-
+        if self.center_x < SCREEN_WIDTH:
+            self.kill()
+        if self.center_x > SCREEN_WIDTH:
+            self.kill()
+        
 ####   Enemy1 ####
 class Enemy1(arcade.Sprite):
-    def setup(self, x, y, all_sprites_list, laser_e_list):
-        self.all_sprites_list = all_sprites_list
-        self.laser_e_list = arcade.SpriteList()
+    def setup(self, x, y,  laser_e_list):   
+        self.laser_e_list = laser_e_list
         self.center_x = x
         self.center_y = y
         self.center_y -= random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT * 50)
         self.center_x -= random.randrange(SCREEN_WIDTH-10)
-
-        self.wait_time = 0
         self.frame_count = 0 
 
     def shoot(self):
         laser_e = Laser_E("images/laser2.png", SPRITE_SCALING * 1.5)
         laser_e.center_x = self.center_x
         laser_e.bottom = self.top -20
-        
-        
         laser_e.center_x = self.center_x
         laser_e.top = self.bottom
-        
-        self.all_sprites_list.append(laser_e)
-        #self.laser_list.append(laser)
+        self.laser_e_list.append(laser_e)
 
-    def update(self):
+    def update(self,delta):
         self.frame_count += 1
         self.center_y -= 3
         if self.top < 620:
@@ -138,7 +137,7 @@ class Enemy1(arcade.Sprite):
 
 
 ####   Enemy2 ####
-class Enemy2(arcade.Sprite):
+'''class Enemy2(arcade.Sprite):
     def setup(self, x, y, all_sprites_list, laser_e_list):
         self.all_sprites_list = all_sprites_list
         self.laser_e_list = arcade.SpriteList()
@@ -173,4 +172,4 @@ class Enemy2(arcade.Sprite):
             self.shoot()
         for laser_e in self.laser_e_list:         
             if laser_e.bottom < 0:
-                laser_e.kill()
+                laser_e.kill()'''

@@ -16,7 +16,6 @@ class Background(arcade.Sprite):
         if self.top < 0:
             self.bottom = SCREEN_HEIGHT
 
-
 class Explosion(arcade.Sprite):
     def setup(self, x, y):
         self.center_x = x

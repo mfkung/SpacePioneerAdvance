@@ -23,5 +23,4 @@ class Explosion(arcade.Sprite):
 
 class Potion(arcade.Sprite):
     def update(self):
-        super().update()
         self.center_y -= 2     

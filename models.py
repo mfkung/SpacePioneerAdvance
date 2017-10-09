@@ -27,7 +27,7 @@ class Player(arcade.Sprite):
     def respawn(self):
         self.respawning = 1
         self.center_x = SCREEN_WIDTH / 2
-        self.center_y = 20
+        self.center_y = 60
         self.angle = 0
     def on_key_press(self, key, modifiers):
         if key == arcade.key.RIGHT:
@@ -111,7 +111,7 @@ class Enemy1(arcade.Sprite):
 
 
 ####   Enemy2 ####
-'''class Enemy2(arcade.Sprite):
+class Enemy2(arcade.Sprite):
     def setup(self, x, y, all_sprites_list, laser_e_list):
         self.all_sprites_list = all_sprites_list
         self.laser_e_list = arcade.SpriteList()
@@ -146,4 +146,4 @@ class Enemy1(arcade.Sprite):
             self.shoot()
         for laser_e in self.laser_e_list:         
             if laser_e.bottom < 0:
-                laser_e.kill()'''
+                laser_e.kill()

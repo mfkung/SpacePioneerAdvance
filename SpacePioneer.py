@@ -11,6 +11,7 @@ INSTRUCTIONS_PAGE_0 = 0
 GAME_RUNNING = 1
 GAME_OVER = 2
 MAX_ENEMY1 = 5
+MAX_HP = 3
 
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
@@ -20,7 +21,6 @@ class SpaceGameWindow(arcade.Window):
         self.set_mouse_visible(False)
         self.score = 0
         self.counter = 0
-        self.lives = 3
         #self.cure = 0
         self.blast_time = 0
         self.game_over = False
@@ -49,7 +49,7 @@ class SpaceGameWindow(arcade.Window):
         self.player = Player("images/rocket2.png", SPRITE_SCALING)
         self.player.setup(SCREEN_WIDTH/2, 60, self.laser_list)
         self.all_sprites_list.append(self.player)
-        self.lives = 3
+        self.lives = MAX_HP
     #Set life
         cur_pos = SCREEN_WIDTH-120
         for i in range(self.lives):
@@ -57,7 +57,6 @@ class SpaceGameWindow(arcade.Window):
             life.center_x = cur_pos + life.width
             life.center_y = SCREEN_HEIGHT -50
             cur_pos += life.width
-            self.all_sprites_list.append(life)
             self.life_list.append(life)
     
         
@@ -94,6 +93,7 @@ class SpaceGameWindow(arcade.Window):
         self.laser_e_list.draw()
         self.blast_list.draw()
         self.cure_list.draw()
+        self.life_list.draw()
         output = "Score: {}".format(self.score)
         arcade.draw_text(output, 10, 620, arcade.color.WHITE, 14)                                  
         for enemy in self.enemy_list:
@@ -126,7 +126,9 @@ class SpaceGameWindow(arcade.Window):
             self.setup()
         elif self.current_state == GAME_OVER:
             self.setup()
-            self.current_state = GAME_RUNNING  
+            self.current_state = GAME_RUNNING 
+            self.score = 0 
+            self.counter = 0
 
     def split_asteroid(self, asteroid: Falling):
        # print("split")
@@ -181,6 +183,8 @@ class SpaceGameWindow(arcade.Window):
                         asteroid.kill()  
                 self.asteroid_list.update()
                 self.laser_list.update()
+                self.cure_list.update()
+                self.life_list.update()
                 if self.counter % 75 == 0 and len(self.enemy_list) < MAX_ENEMY1:
 
                     self.enemy1_sprite = Enemy1("images/spaceship1.png", SPRITE_SCALING)
@@ -191,14 +195,16 @@ class SpaceGameWindow(arcade.Window):
                     #self.enemy1_sprite.center_x = randint(40,440)
                     choice.remove(random.choice(choice))
                     self.enemy_list.append(self.enemy1_sprite)
-                if self.counter == 5:
-                    self.cure = Potion("images/Health.png", SPRITE_SCALING)
-                    self.enemy1_sprite.center_y = SCREEN_HEIGHT + 20
-                    self.cure.center_x = randint(40,400)
+
+                if self.counter == 1:
+                    self.cure = Potion("images/Health.png", SPRITE_SCALING * 2.5)
+                    self.cure.center_x = random.randrange(SCREEN_WIDTH)
+                    self.cure.center_y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT * 2)
                     self.cure_list.append(self.cure)
 
 
-            #################   HIT CHECK ##################
+        #################   HIT CHECK ##################
+                ##### KILL ASTEROID ######    
                 for laser in self.laser_list:
                     asteroids = arcade.check_for_collision_with_list(laser, self.asteroid_list)
                     if len(asteroids) > 0:
@@ -213,7 +219,8 @@ class SpaceGameWindow(arcade.Window):
                             
                             
                         
-                if not self.player.respawning:        
+                if not self.player.respawning:
+                ##### ASTEROID HIT PLAYER  #####            
                     asteroids = arcade.check_for_collision_with_list(self.player, self.asteroid_list)
                     
                     if len(asteroids) > 0:
@@ -224,14 +231,33 @@ class SpaceGameWindow(arcade.Window):
                                 self.blast_list.append(blast)
                             print("-1 live")
                             self.lives -= 1
+                            self.life_list.pop().kill()
                             self.player.respawn()
                             asteroids[0].kill()
+                            print(self.lives)
 
-                            self.life_list.pop().kill()
-                        else:
-                            self.game_over = True
-                            print("game over")
-                            #exit()
+                ##### POTION HIT PLAYER  #####            
+                    potion = arcade.check_for_collision_with_list(self.player, self.cure_list)
+                    
+                    if len(potion) > 0:
+                        if self.lives > 0 and self.lives < 3:
+                            self.lives += 1
+                            print(self.lives)
+                            potion[0].kill()
+                            for i in range(self.lives-1):
+                                if self.lives > 1:
+                                    self.life_list.pop().kill
+                            cur_pos = SCREEN_WIDTH-120
+                            for i in range(self.lives):
+                                life = arcade.Sprite("images/lives.png", SPRITE_SCALING)
+                                life.center_x = cur_pos + life.width
+                                life.center_y = SCREEN_HEIGHT -50
+                                cur_pos += life.width
+                                self.life_list.append(life)
+                                self.life_list.update()
+                        elif self.lives == MAX_HP:
+                            potion[0].kill()          
+                ##### LASER HIT PLAYER  #####            
                     laser = arcade.check_for_collision_with_list(self.player, self.laser_e_list)
                     
                     if len(laser) > 0:
@@ -247,10 +273,9 @@ class SpaceGameWindow(arcade.Window):
                             laser[0].kill()
 
                             self.life_list.pop().kill()
-                        else:
-                            self.game_over = True
-                            print("game over")
-                            #exit()        
+                            print(self.lives)
+ 
+            ##### KILL ENEMY1 #####                     
                 for laser in self.laser_list:
                     player_hits = arcade.check_for_collision_with_list(laser, self.enemy_list)
                     if len(player_hits) > 0:
@@ -262,17 +287,17 @@ class SpaceGameWindow(arcade.Window):
                                 blast.setup(enemy.center_x, enemy.center_y)
                                 self.blast_list.append(blast)
                         self.score += 5
-
+            ##### DELAY BLAST #####
                 self.blast_time += delta
                 if self.blast_time > 0.005 :
                     self.blast_time = 0
                     if len(self.blast_list) > 0:
                         self.blast_list[0].kill()
-                self.counter += 1
-                if len(self.life_list) == 0:
+            ##### CHECK GAME OVER ####            
+                if self.lives == 0:
                     self.current_state = GAME_OVER
                     self.set_mouse_visible(True)
-
+                self.counter += 1
 
 
 if __name__ == '__main__':

@@ -3,12 +3,13 @@ import random
 import math
 from random import randint
 from models import Player,Laser,Enemy1,Falling
-from misc import Background, Explosion
+from misc import Background, Explosion , Potion
 SCREEN_WIDTH = 480
 SCREEN_HEIGHT = 640
 SPRITE_SCALING = 0.6
 INSTRUCTIONS_PAGE_0 = 0
 GAME_RUNNING = 1
+GAME_OVER = 2
 MAX_ENEMY1 = 5
 
 class SpaceGameWindow(arcade.Window):
@@ -42,6 +43,7 @@ class SpaceGameWindow(arcade.Window):
         self.laser_list = arcade.SpriteList()
         self.laser_e_list = arcade.SpriteList()
         self.life_list = arcade.SpriteList()
+        self.cure_list = arcade.SpriteList()
         self.blast_list = arcade.SpriteList()
     #Set player
         self.player = Player("images/rocket2.png", SPRITE_SCALING)
@@ -49,11 +51,11 @@ class SpaceGameWindow(arcade.Window):
         self.all_sprites_list.append(self.player)
         self.lives = 3
     #Set life
-        cur_pos = SCREEN_WIDTH-90
+        cur_pos = SCREEN_WIDTH-120
         for i in range(self.lives):
-            life = arcade.Sprite("images/rocket2.png", SPRITE_SCALING/2.5)
+            life = arcade.Sprite("images/lives.png", SPRITE_SCALING)
             life.center_x = cur_pos + life.width
-            life.center_y = SCREEN_HEIGHT-30
+            life.center_y = SCREEN_HEIGHT -50
             cur_pos += life.width
             self.all_sprites_list.append(life)
             self.life_list.append(life)
@@ -77,12 +79,21 @@ class SpaceGameWindow(arcade.Window):
         arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2,
                                       page_texture.width,
                                       page_texture.height, page_texture, 0)
+    def draw_game_over(self):
+
+        output = "Game Over"
+        arcade.draw_text(output, 80 , 360 , arcade.color.WHITE, 54)
+
+        output = "Click to restart"
+        arcade.draw_text(output, 140, 310, arcade.color.WHITE, 24)
+                                          
     def draw_game(self):
         self.all_sprites_list.draw()
         self.laser_list.draw()
         self.asteroid_list.draw()
         self.laser_e_list.draw()
         self.blast_list.draw()
+        self.cure_list.draw()
         output = "Score: {}".format(self.score)
         arcade.draw_text(output, 10, 620, arcade.color.WHITE, 14)                                  
         for enemy in self.enemy_list:
@@ -96,6 +107,10 @@ class SpaceGameWindow(arcade.Window):
             self.draw_instructions_page(0)
         elif self.current_state == GAME_RUNNING:
             self.draw_game()
+        else:
+            self.draw_game()
+            self.draw_game_over()
+
         
     #Key setting
     def on_key_press(self, key, key_modifiers):
@@ -109,6 +124,10 @@ class SpaceGameWindow(arcade.Window):
         if self.current_state == INSTRUCTIONS_PAGE_0:    
             self.current_state = GAME_RUNNING
             self.setup()
+        elif self.current_state == GAME_OVER:
+            self.setup()
+            self.current_state = GAME_RUNNING  
+
     def split_asteroid(self, asteroid: Falling):
        # print("split")
         x = asteroid.center_x
@@ -172,8 +191,11 @@ class SpaceGameWindow(arcade.Window):
                     #self.enemy1_sprite.center_x = randint(40,440)
                     choice.remove(random.choice(choice))
                     self.enemy_list.append(self.enemy1_sprite)
-
-
+                if self.counter == 5:
+                    self.cure = Potion("images/Health.png", SPRITE_SCALING)
+                    self.enemy1_sprite.center_y = SCREEN_HEIGHT + 20
+                    self.cure.center_x = randint(40,400)
+                    self.cure_list.append(self.cure)
 
 
             #################   HIT CHECK ##################
@@ -196,8 +218,8 @@ class SpaceGameWindow(arcade.Window):
                     
                     if len(asteroids) > 0:
                         if self.lives > 0:
-                            for i in range(1, 10):
-                                blast = Explosion("images/Explosion/images/explosion"+str(i)+".png", SPRITE_SCALING)
+                            for i in range(1, 12):
+                                blast = Explosion("images/Explosion/crash/crash"+str(i)+".png", SPRITE_SCALING)
                                 blast.setup(self.player.center_x, self.player.center_y)
                                 self.blast_list.append(blast)
                             print("-1 live")
@@ -209,14 +231,15 @@ class SpaceGameWindow(arcade.Window):
                         else:
                             self.game_over = True
                             print("game over")
-                            exit()
+                            #exit()
                     laser = arcade.check_for_collision_with_list(self.player, self.laser_e_list)
                     
                     if len(laser) > 0:
                         if self.lives > 0:
-                            for i in range(1, 10):
-                                blast = Explosion("images/Explosion/images/explosion"+str(i)+".png", SPRITE_SCALING)
+                            for i in range(1, 12):
+                                blast = Explosion("images/Explosion/crash/crash"+str(i)+".png", SPRITE_SCALING)
                                 blast.setup(self.player.center_x, self.player.center_y)
+                                blast.change_angle = (random.random() - 0.5) * 1.4
                                 self.blast_list.append(blast)
                             print("-1 live")
                             self.lives -= 1
@@ -227,7 +250,7 @@ class SpaceGameWindow(arcade.Window):
                         else:
                             self.game_over = True
                             print("game over")
-                            exit()        
+                            #exit()        
                 for laser in self.laser_list:
                     player_hits = arcade.check_for_collision_with_list(laser, self.enemy_list)
                     if len(player_hits) > 0:
@@ -241,12 +264,14 @@ class SpaceGameWindow(arcade.Window):
                         self.score += 5
 
                 self.blast_time += delta
-                if self.blast_time > 0.02 :
+                if self.blast_time > 0.005 :
                     self.blast_time = 0
                     if len(self.blast_list) > 0:
                         self.blast_list[0].kill()
                 self.counter += 1
-                        
+                if len(self.life_list) == 0:
+                    self.current_state = GAME_OVER
+                    self.set_mouse_visible(True)
 
 
 

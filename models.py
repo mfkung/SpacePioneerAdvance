@@ -39,14 +39,14 @@ class Player(arcade.Sprite):
         elif key == arcade.key.DOWN:
             self.change_y = -MOVEMENT_SPEED
         elif not self.respawning and key == arcade.key.SPACE:
-            laser = Laser("images/laser1.png", SPRITE_SCALING * 1.5)
+            laser = Laser("images/laser1.1.png", SPRITE_SCALING * 1.5)
             laser.center_x = self.center_x
             laser.bottom = self.top -20
             self.laser_list.append(laser)    
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.change_x = 0
-        elif key == arcade.key.UP or key == arcade.key.LEFT:
+        elif key == arcade.key.UP or key == arcade.key.DOWN:
             self.change_y = 0   
     
     def update(self):

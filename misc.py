@@ -19,4 +19,9 @@ class Background(arcade.Sprite):
 class Explosion(arcade.Sprite):
     def setup(self, x, y):
         self.center_x = x
-        self.center_y = y            
+        self.center_y = y  
+
+class Potion(arcade.Sprite):
+    def update(self):
+        super().update()
+        self.center_y -= 2     

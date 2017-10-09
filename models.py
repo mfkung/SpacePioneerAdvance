@@ -14,33 +14,21 @@ SPRITE_SCALING = 0.7
 #              arcade.key.LEFT: DIR_LEFT}
 class Laser(arcade.Sprite):
     def update(self):
-        self.isEnemy = False
         self.center_y += LASER_SPEED
-        if self.center_x < -100 or self.center_x > 1500 or \
-                self.center_y > 1100 or self.center_y < -100:
-            self.kill()
 class Laser_E(arcade.Sprite):
     def update(self):
-        self.center_y -= LASER_SPEED-6.5
-
-
+        self.center_y -= LASER_SPEED-9
 class Player(arcade.Sprite):
-    def setup(self, x, y, all_sprites_list, rock_list, enemy_list, score, laser_list):
-        self.all_sprites_list = all_sprites_list
+    def setup(self, x, y,  laser_list):
         self.laser_list = laser_list
-        self.rock_list = rock_list
-        self.enemy_list = enemy_list
         self.center_x = x
         self.center_y = y    
-        self.score = score  
         self.respawning = 0  
     def respawn(self):
-
         self.respawning = 1
         self.center_x = SCREEN_WIDTH / 2
         self.center_y = 20
         self.angle = 0
-
     def on_key_press(self, key, modifiers):
         if key == arcade.key.RIGHT:
             self.change_x = MOVEMENT_SPEED
@@ -54,11 +42,7 @@ class Player(arcade.Sprite):
             laser = Laser("images/laser1.png", SPRITE_SCALING * 1.5)
             laser.center_x = self.center_x
             laser.bottom = self.top -20
-            
-           
-            #self.all_sprites_list.append(laser)
             self.laser_list.append(laser)    
-
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.change_x = 0
@@ -101,8 +85,7 @@ class Enemy1(arcade.Sprite):
         self.laser_e_list = laser_e_list
         self.center_x = x
         self.center_y = y
-        self.center_y -= random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT * 50)
-        self.center_x -= random.randrange(SCREEN_WIDTH-10)
+        self.pos_y = randint(440, 540)
         self.frame_count = 0 
 
     def shoot(self):

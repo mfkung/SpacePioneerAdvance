@@ -24,6 +24,7 @@ class SpaceGameWindow(arcade.Window):
         self.counter = 0
         #self.cure = 0
         self.blast_time = 0
+        self.particle_time = 0
         self.game_over = False
         self.instructions = []
         texture = arcade.load_texture("images/intro2.png")
@@ -46,6 +47,7 @@ class SpaceGameWindow(arcade.Window):
         self.life_list = arcade.SpriteList()
         self.cure_list = arcade.SpriteList()
         self.blast_list = arcade.SpriteList()
+        self.particle_list = arcade.SpriteList()
     #Set player
         self.player = Player("images/rocket2.png", SPRITE_SCALING)
         self.player.setup(SCREEN_WIDTH/2, 60, self.laser_list)
@@ -95,6 +97,7 @@ class SpaceGameWindow(arcade.Window):
         self.blast_list.draw()
         self.cure_list.draw()
         self.life_list.draw()
+        self.particle_list.draw()
         output = "Score: {}".format(self.score)
         arcade.draw_text(output, 10, 620, arcade.color.WHITE, 14)                                  
         for enemy in self.enemy_list:
@@ -190,7 +193,7 @@ class SpaceGameWindow(arcade.Window):
                 enemy_sprite.change_x = random.random() * 2.5 - 1.25
                 enemy_sprite.change_y = random.random() * 2.5 - 1.25
                 enemy_sprite.change_angle = (random.random() - 0.5) * 2
-                self.all_sprites_list.append(enemy_sprite)
+                self.particle_list.append(enemy_sprite)
        
         elif asteroid.size == 2:
             for i in range(6):
@@ -207,11 +210,10 @@ class SpaceGameWindow(arcade.Window):
                 enemy_sprite.change_angle = (random.random() - 0.5) * 2
                 enemy_sprite.size = 1
 
-
-                self.all_sprites_list.append(enemy_sprite)
+                self.particle_list.append(enemy_sprite)
 
         elif asteroid.size == 1:
-            for i in range(6):
+            for i in range(3):
                 image_no = random.randrange(2)
                 image_list = ["images/testParticle.png",
                               "images/testParticle1.png"]
@@ -224,9 +226,9 @@ class SpaceGameWindow(arcade.Window):
                 enemy_sprite.change_y = random.random() * 3.5 - 1.75
                 enemy_sprite.change_angle = (random.random() - 0.5) * 2
                 enemy_sprite.size = 0
-                self.all_sprites_list.append(enemy_sprite)
+                self.particle_list.append(enemy_sprite)
 
-    def particle_asteroid(self, enemy: Particle):
+    def particle_enemy(self, enemy: Particle):
        # print("split")
         x = enemy.center_x
         y = enemy.center_y
@@ -243,8 +245,26 @@ class SpaceGameWindow(arcade.Window):
             enemy_sprite.change_x = random.random() * 2.5 - 1.25
             enemy_sprite.change_y = random.random() * 2.5 - 1.25
             enemy_sprite.change_angle = (random.random() - 0.5) * 2
-            self.all_sprites_list.append(enemy_sprite)
-       
+            self.particle_list.append(enemy_sprite)
+
+    def particle_self(self, player: Particle):
+       # print("split")
+        x = player.center_x
+        y = player.center_y
+        
+        for i in range(15):
+            image_no = random.randrange(2)
+            image_list = ["images/testParticle.png",
+                            "images/testParticle1.png"]
+
+            my_sprite = Particle(image_list[image_no],
+                                            SPRITE_SCALING )
+            my_sprite.center_y = y
+            my_sprite.center_x = x
+            my_sprite.change_x = random.random()  *2.5 - 1
+            my_sprite.change_y = random.random()  *2.5 - 1
+            my_sprite.change_angle = (random.random() - 0.5) * 2
+            self.particle_list.append(my_sprite)
         
 
     def update(self, delta):
@@ -263,6 +283,7 @@ class SpaceGameWindow(arcade.Window):
                 self.laser_list.update()
                 self.cure_list.update()
                 self.life_list.update()
+                self.particle_list.update()
                 if self.counter % 120 == 0 and len(self.enemy_list) < MAX_ENEMY1:
 
                     enemy = Enemy1("images/spaceship1.png", SPRITE_SCALING)
@@ -315,11 +336,12 @@ class SpaceGameWindow(arcade.Window):
                     
                     if len(asteroids) > 0:
                         if self.lives > 0:
-                            for i in range(1,12):
+                            '''for i in range(1,12):
                                 blast = Explosion("images/Explosion/crash/crash"+str(i)+".png", SPRITE_SCALING)
                                 blast.setup(self.player.center_x, self.player.center_y)
-                                self.blast_list.append(blast)
+                                self.blast_list.append(blast)'''
                             print("-1 live")
+                            self.particle_self(self.player)
                             self.lives -= 1
                             self.life_list.pop().kill()
                             self.player.respawn()
@@ -352,12 +374,13 @@ class SpaceGameWindow(arcade.Window):
                     
                     if len(laser) > 0:
                         if self.lives > 0:
-                            for i in range(1, 12):
+                            '''for i in range(1, 12):
                                 blast = Explosion("images/Explosion/crash/crash"+str(i)+".png", SPRITE_SCALING)
                                 blast.setup(self.player.center_x, self.player.center_y)
                                 blast.change_angle = (random.random() - 0.5) * 1.4
-                                self.blast_list.append(blast)
+                                self.blast_list.append(blast)'''
                             print("-1 live")
+                            self.particle_self(self.player)
                             self.lives -= 1
                             self.player.respawn()
                             laser[0].kill()
@@ -376,14 +399,20 @@ class SpaceGameWindow(arcade.Window):
                                 blast = Explosion("images/Explosion/images/explosion"+str(i)+".png", SPRITE_SCALING)
                                 blast.setup(enemy.center_x, enemy.center_y)
                                 self.blast_list.append(blast)
-                            self.particle_asteroid(enemy)    
+                            self.particle_enemy(enemy)    
                         self.score += 5
             ##### DELAY BLAST #####
                 self.blast_time += delta
+                self.particle_time += delta
                 if self.blast_time > 0.005 :
                     self.blast_time = 0
                     if len(self.blast_list) > 0:
                         self.blast_list[0].kill()
+
+                if self.particle_time > 0.1 :
+                    self.particle_time = 0
+                    if len(self.particle_list) > 0:
+                        self.particle_list[0].kill()        
             ##### CHECK GAME OVER ####            
                 if self.lives == 0:
                     self.current_state = GAME_OVER

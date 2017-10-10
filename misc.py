@@ -24,3 +24,15 @@ class Explosion(arcade.Sprite):
 class Potion(arcade.Sprite):
     def update(self):
         self.center_y -= 2     
+
+class Falling(arcade.Sprite):
+    def update(self):
+        super().update()
+        self.center_y -= 2
+
+class Particle(arcade.Sprite):
+    def update(self):
+        super().update()
+        self.center_y -= 0.5
+
+            

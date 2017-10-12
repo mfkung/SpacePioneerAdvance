@@ -61,7 +61,7 @@ class Player(arcade.Sprite):
             self.top = SCREEN_HEIGHT-5 
 
         if self.respawning:
-            self.respawning += 2
+            self.respawning += 1
             self.alpha = self.respawning / 500
             if self.respawning > 250:
                 self.respawning = 0

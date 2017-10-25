@@ -17,16 +17,38 @@ class Laser(arcade.Sprite):
         self.center_y += LASER_SPEED
 
 class Player(arcade.Sprite):
-    def setup(self, x, y,  laser_list):
+    def setup(self, x, y ,laser_list):
         self.laser_list = laser_list
+
         self.center_x = x
         self.center_y = y    
-        self.respawning = 0  
+        self.respawning = 0 
+
     def respawn(self):
         self.respawning = 1
         self.center_x = SCREEN_WIDTH / 2
         self.center_y = 60
         self.angle = 0
+    def level(self,level):
+        self.level = level
+        print(self.level) 
+    def level_1(self):
+        laser = Laser("images/Player/laser1.1.png", SPRITE_SCALING * 1.5)
+        laser.center_x = self.center_x
+        laser.bottom = self.top -20
+        self.laser_list.append(laser)
+
+    def level_2(self):
+        laser = Laser("images/Player/laser1.1.png", SPRITE_SCALING * 1.5)
+        laser.center_x = self.center_x-20
+        laser.bottom = self.top -20
+        self.laser_list.append(laser)
+
+        laser = Laser("images/Player/laser1.1.png", SPRITE_SCALING * 1.5)
+        laser.center_x = self.center_x+20
+        laser.bottom = self.top -20
+
+        self.laser_list.append(laser) 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.RIGHT:
             self.change_x = MOVEMENT_SPEED
@@ -37,10 +59,11 @@ class Player(arcade.Sprite):
         elif key == arcade.key.DOWN:
             self.change_y = -MOVEMENT_SPEED
         elif not self.respawning and key == arcade.key.SPACE:
-            laser = Laser("images/laser1.1.png", SPRITE_SCALING * 1.5)
-            laser.center_x = self.center_x
-            laser.bottom = self.top -20
-            self.laser_list.append(laser)    
+            if self.level == 1:
+                self.level_1()
+            else:
+                self.level_2()
+    
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.change_x = 0
@@ -50,7 +73,6 @@ class Player(arcade.Sprite):
     def update(self):
         self.center_x += self.change_x
         self.center_y += self.change_y
-
         if self.left < -5:
             self.left = -5
         if self.right > SCREEN_WIDTH+5:

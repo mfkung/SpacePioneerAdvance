@@ -5,7 +5,7 @@ from random import randint
 from models import Player
 SCREEN_WIDTH = 480
 SCREEN_HEIGHT = 640
-MOVEMENT_SPEED = 6
+MOVEMENT_SPEED = 2
 LASER_SPEED = 10
 SPRITE_SCALING = 0.7
 
@@ -44,5 +44,24 @@ class Enemy2(arcade.Sprite):
         self.frame_count += 1
         if self.center_y > self.pos_y:
             self.center_y -= 3
+
+class Boss1(arcade.Sprite):
+    def setup(self, x, y,  boss_beam, beam_state):   
+        self.boss_beam = boss_beam
+        self.beam_state = beam_state
+        self.center_x = x
+        self.center_y = y
+        self.pos_y = 550
+        self.frame_count = 0 
+
+
+    def update(self,delta):
+        self.frame_count += 1
+        self.center_x += self.change_x
+        if self.center_y > self.pos_y:
+            self.center_y -= 3
+
+                 
+        
 
 

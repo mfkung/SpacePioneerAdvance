@@ -35,4 +35,16 @@ class Particle(arcade.Sprite):
         super().update()
         self.center_y -= 0.5
 
+class Beam(arcade.Sprite):
+    def setup(self, x, y ):
+        self.center_x = x
+        self.top = y
+        self.pos_y = 480
+    def update(self):
+        if self.center_y > self.pos_y:
+            self.center_y -= 3
+            
+        
+        
+
             
